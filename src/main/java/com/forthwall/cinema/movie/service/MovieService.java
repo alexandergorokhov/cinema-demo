@@ -1,15 +1,16 @@
 package com.forthwall.cinema.movie.service;
 
 import com.forthwall.cinema.movie.service.dto.MovieDto;
-import com.forthwall.cinema.movie.service.dto.MovieTimeDto;
-import org.springframework.stereotype.Service;
+import com.forthwall.cinema.movie.service.dto.MovieTimeSessionDto;
 
-import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface MovieService {
 
-    MovieTimeDto getMovieByIdAndDate(MovieTimeDto movieTimeDto);
+    MovieTimeSessionDto getMovieByIdAndDate(MovieTimeSessionDto movieTimeSessionDto);
 
     List<MovieDto> getAllMovies();
+
+    List<MovieTimeSessionDto> getMoviesByDate(LocalDate date);
 }

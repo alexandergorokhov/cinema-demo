@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
@@ -21,7 +22,7 @@ import java.util.ArrayList;
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
-public class MovieTimeViewResponse {
+public class MovieTimeSessionViewResponse {
     /**
      * Id of the movie
      */
@@ -32,12 +33,17 @@ public class MovieTimeViewResponse {
     private String name;
 
     /**
-     * List of rooms where the movie is played
+     * Rooms where the movie is played
      */
-    private ArrayList<String> rooms;
+    private String rooms;
 
     /**
      * Date and time when the movie is played
      */
-    private LocalDateTime dateTimeMovie;
+    private LocalDate dateMovie;
+
+    /**
+     * Time when the movie is played
+     */
+    private String timeMovie;
 }

@@ -1,15 +1,13 @@
 package com.forthwall.cinema.movie.service.dto;
 
-import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.springframework.cglib.core.Local;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 
 /**
  * A DTO used to transport information of movie timing
@@ -19,7 +17,7 @@ import java.util.ArrayList;
 @ToString
 @EqualsAndHashCode
 @NoArgsConstructor
-public class MovieTimeDto {
+public class MovieTimeSessionDto {
     /**
      * Id of the movie
      */
@@ -30,12 +28,17 @@ public class MovieTimeDto {
     private String name;
 
     /**
-     * List of rooms where the movie is played
+     * Rooms where the movie is played
      */
-    private ArrayList<String> rooms;
+    private String rooms;
 
     /**
      * Date and time when the movie is played
      */
-    private LocalDateTime dateTimeMovie;
+    private LocalDateTime timeMovie;
+
+    /**
+     * Date  when the movie is played
+     */
+    private LocalDate dateMovie;
 }

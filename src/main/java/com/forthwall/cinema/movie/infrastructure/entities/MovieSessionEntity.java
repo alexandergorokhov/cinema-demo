@@ -27,7 +27,7 @@ public class MovieSessionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_movie_session")
+    @Column(name = "id_session")
     private Long idSession;
 
     @ManyToOne
@@ -40,5 +40,5 @@ public class MovieSessionEntity {
     @Column(name = "room")
     private String room;
     @Column(name = "session_date")
-    private LocalDate date;
+    private LocalDate sessionDate;
 }
