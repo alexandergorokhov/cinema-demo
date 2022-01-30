@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -22,6 +23,11 @@ public class MovieTimeSessionDto {
      * Id of the movie
      */
     private Long idMovie;
+
+    /**
+     * Id of the session
+     */
+    private Long idSession;
     /**
      * Name of the movie
      */
@@ -41,4 +47,9 @@ public class MovieTimeSessionDto {
      * Date  when the movie is played
      */
     private LocalDate dateMovie;
+
+    /**
+     * Price of the movie whic is played
+     */
+    private BigDecimal price;
 }

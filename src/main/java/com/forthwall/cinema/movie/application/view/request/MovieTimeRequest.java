@@ -15,13 +15,13 @@ import lombok.ToString;
 @ToString
 @EqualsAndHashCode
 @NoArgsConstructor
-public class MovieTimeViewRequest {
+public class MovieTimeRequest {
     /**
      * Id of the movie
      */
     private Long idMovie;
     /**
-     * Date for which the avalibility of the movie wants to be queried.
+     * Date for which the availability of the movie wants to be queried.
      */
     private String date;
 }

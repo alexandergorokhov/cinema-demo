@@ -1,28 +1,35 @@
 package com.forthwall.cinema.movie.service.implementation;
 
 import com.forthwall.cinema.movie.infrastructure.MovieDao;
+import com.forthwall.cinema.movie.infrastructure.MovieReviewDao;
 import com.forthwall.cinema.movie.infrastructure.MovieSessionDao;
 import com.forthwall.cinema.movie.infrastructure.entities.MovieEntity;
+import com.forthwall.cinema.movie.infrastructure.entities.MovieReviewEntity;
 import com.forthwall.cinema.movie.infrastructure.entities.MovieSessionEntity;
 import com.forthwall.cinema.movie.service.MovieService;
 import com.forthwall.cinema.movie.service.dto.MovieDto;
 import com.forthwall.cinema.movie.service.dto.MovieTimeSessionDto;
+import com.forthwall.cinema.movie.service.dto.ReviewDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class MovieServiceImpl implements MovieService {
     private MovieSessionDao movieSessionDao;
     private MovieDao movieDao;
+    private MovieReviewDao movieReviewDao;
 
     @Autowired
-    public MovieServiceImpl(MovieSessionDao movieSessionDao, MovieDao movieDao) {
+    public MovieServiceImpl(MovieSessionDao movieSessionDao, MovieDao movieDao, MovieReviewDao movieReviewDao) {
         this.movieSessionDao = movieSessionDao;
         this.movieDao = movieDao;
+        this.movieReviewDao = movieReviewDao;
     }
 
     @Override
@@ -54,9 +61,9 @@ public class MovieServiceImpl implements MovieService {
      */
     @Override
     public List<MovieTimeSessionDto> getMoviesByDate(LocalDate date) {
-       List<MovieSessionEntity> entities = movieSessionDao.findByDate(date);
-       List<MovieTimeSessionDto> response = new ArrayList<>();
-        for (MovieSessionEntity entity: entities
+        List<MovieSessionEntity> entities = movieSessionDao.findByDate(date);
+        List<MovieTimeSessionDto> response = new ArrayList<>();
+        for (MovieSessionEntity entity : entities
         ) {
             MovieTimeSessionDto dto = new MovieTimeSessionDto();
             dto.setIdMovie(entity.getMovie().getIdMovie());
@@ -67,5 +74,31 @@ public class MovieServiceImpl implements MovieService {
             response.add(dto);
         }
         return response;
+    }
+    @Transactional
+    @Override
+    public void updateMovieTimeSession(MovieTimeSessionDto timeSessionDto) {
+        MovieSessionEntity sessionEntity = movieSessionDao.findById(timeSessionDto.getIdSession()).orElseThrow();
+        movieSessionDao.updateDate(timeSessionDto.getDateMovie(),timeSessionDto.getTimeMovie().toLocalTime(),
+            sessionEntity.getIdSession());
+    }
+
+    @Transactional
+    @Override
+    public void updateMoviePriceSession(MovieTimeSessionDto timeSessionDto) {
+        MovieSessionEntity sessionEntity = movieSessionDao.findById(timeSessionDto.getIdSession()).orElseThrow();
+        movieSessionDao.updatePriceById(timeSessionDto.getPrice(),sessionEntity.getIdSession());
+    }
+
+    @Override
+    public void saveReview(ReviewDto dto) {
+        MovieReviewEntity entity =  new MovieReviewEntity();
+        MovieEntity movieEntity = new MovieEntity();
+        movieEntity.setIdMovie(dto.getIdMovie());
+        entity.setMovie(movieEntity);
+        entity.setComment(dto.getComment());
+        entity.setStars(dto.getStars());
+        movieReviewDao.save(entity);
+
     }
 }

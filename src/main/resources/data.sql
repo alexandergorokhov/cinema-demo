@@ -16,3 +16,10 @@ INSERT INTO MOVIE_SESSION (id_movie,session_time,price,session_date,room) VALUES
   (4,'2022-08-14T17:45:55.9483536', 8.01,PARSEDATETIME('04-february-22','dd-MMMM-yy'),'yellow_room'),
   (5,'2022-09-14T17:45:55.9483536', 9.01,PARSEDATETIME('05-february-22','dd-MMMM-yy'),'yellow_room');
 
+INSERT INTO MOVIE_REVIEW (id_movie,stars,comment) VALUES
+  (2,3,'good'),
+  (3,6,'bad'),
+  (3,1,'silly'),
+  (3,9,'smart'),
+  (4,4,'Harry Potter');
+

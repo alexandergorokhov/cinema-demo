@@ -10,3 +10,11 @@ CREATE TABLE IF NOT EXISTS MOVIE_SESSION (
   session_date DATE,
   CONSTRAINT `movie_id_on_movie_session` FOREIGN KEY (`id_movie`) REFERENCES `MOVIES` (`id_movie`)
   );
+
+  CREATE TABLE IF NOT EXISTS MOVIE_REVIEW (
+    id_review  LONG PRIMARY KEY,
+    id_movie  LONG NOT NULL,
+    stars  NUMERIC(1),
+    comment VARCHAR(200),
+    CONSTRAINT `movie_id_on_movie_review` FOREIGN KEY (`id_movie`) REFERENCES `MOVIES` (`id_movie`)
+    );

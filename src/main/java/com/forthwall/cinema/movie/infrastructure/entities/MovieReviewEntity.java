@@ -1,7 +1,35 @@
 package com.forthwall.cinema.movie.infrastructure.entities;
 
-import javax.persistence.Entity;
+import lombok.Getter;
+import lombok.Setter;
 
-//@Entity
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "movie_review")
+@Getter
+@Setter
 public class MovieReviewEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_review")
+    private Long idReview;
+
+    @ManyToOne
+    @JoinColumn(name = "id_movie", nullable = false)
+    private MovieEntity movie;
+
+    @Column(name = "stars")
+    private Integer stars;
+
+    @Column(name = "comment")
+    private String comment;
+
 }

@@ -1,20 +1,26 @@
 package com.forthwall.cinema.movie.application;
 
+import com.forthwall.cinema.movie.application.view.request.ReviewRequest;
 import com.forthwall.cinema.movie.application.view.response.MovieViewResponse;
 import com.forthwall.cinema.movie.application.view.response.MovieTimeSessionViewResponse;
 import com.forthwall.cinema.movie.service.MovieService;
 import com.forthwall.cinema.movie.service.dto.MovieDto;
 import com.forthwall.cinema.movie.service.dto.MovieTimeSessionDto;
-import com.forthwall.cinema.movie.application.view.request.MovieTimeViewRequest;
+import com.forthwall.cinema.movie.application.view.request.MovieTimeRequest;
+import com.forthwall.cinema.movie.service.dto.ReviewDto;
 import com.forthwall.cinema.movie.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -33,6 +39,8 @@ public class MovieController {
     MovieService movieServiceImpl;
     private static final String MOVIES = "movies";
     private static final String MOVIES_SESSION = "movieSession";
+    private static final String MOVIE = "movie";
+    private static final String REVIEW = "review";
 
 
     @Autowired
@@ -43,7 +51,7 @@ public class MovieController {
     /**
      * @param idMovie Id of the movie to be viewed
      * @param date    Date of the movie to which the availability wants to be known.
-     * @return {@link MovieTimeViewRequest}. Is a response object that contains
+     * @return {@link MovieTimeRequest}. Is a response object that contains
      * information about movie time, rooms , prices  for desired date.
      * <>200</> - return information
      * <>204<</> - no information was found
@@ -60,7 +68,7 @@ public class MovieController {
             if (idMovie == null && date != null) {
                 List<MovieTimeSessionDto> dtoResponse = movieServiceImpl.getMoviesByDate(LocalDate.parse(date));
                 List<MovieTimeSessionViewResponse> response = prepareListOfMoviesSessionResponse(dtoResponse);
-                return new ResponseEntity(response, HttpStatus.OK);
+                return new ResponseEntity<>(response, HttpStatus.OK);
             }
             MovieTimeSessionDto dtoResponse = movieServiceImpl.getMovieByIdAndDate(dto);
             if (dtoResponse != null) {
@@ -89,7 +97,53 @@ public class MovieController {
 
         } catch (RuntimeException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
+    /**
+     * @param idSession       id of the session in which the movie will shown
+     * @param dateTimeSession date and wimt to which the movie should be updated
+     * @param price           price to which the movie should be updated.
+     * @return Response entity
+     * <200>OK<200/>
+     * <500>Error</500>
+     */
+    @PutMapping(MOVIE)
+    public ResponseEntity updateMovie(@RequestParam(name = "idSession") Long idSession,
+        @RequestParam(name = "dateTimeSession", required = false) String dateTimeSession,
+        @RequestParam(name = "price", required = false) BigDecimal price) {
+        try {
+            MovieTimeSessionDto timeSessionDto = new MovieTimeSessionDto();
+            timeSessionDto.setIdSession(idSession);
+
+            if (dateTimeSession != null) {
+                timeSessionDto.setTimeMovie(LocalDateTime.parse(dateTimeSession, DateUtils.getDateTimeFormatter()));
+                timeSessionDto.setDateMovie(LocalDateTime.parse(dateTimeSession, DateUtils.getDateTimeFormatter()).toLocalDate());
+                movieServiceImpl.updateMovieTimeSession(timeSessionDto);
+            }
+            if (price != null) {
+                timeSessionDto.setPrice(price);
+                movieServiceImpl.updateMoviePriceSession(timeSessionDto);
+            }
+            return new ResponseEntity<>(HttpStatus.OK);
+
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping(REVIEW)
+    public ResponseEntity createReview(@RequestBody ReviewRequest request) {
+        try {
+            ReviewDto dto = new ReviewDto();
+            dto.setComment(request.getComment());
+            dto.setStars(request.getStars());
+            dto.setIdMovie(request.getIdMovie());
+            movieServiceImpl.saveReview(dto);
+            return new ResponseEntity(HttpStatus.OK);
+
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     }
