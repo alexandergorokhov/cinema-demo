@@ -23,10 +23,7 @@ import java.util.ArrayList;
 @Builder
 @AllArgsConstructor
 public class MovieTimeSessionViewResponse {
-    /**
-     * Id of the movie
-     */
-    private Long idMovie;
+
     /**
      * Name of the movie
      */

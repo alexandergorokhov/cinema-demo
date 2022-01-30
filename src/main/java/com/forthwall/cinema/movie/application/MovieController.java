@@ -6,6 +6,7 @@ import com.forthwall.cinema.movie.service.MovieService;
 import com.forthwall.cinema.movie.service.dto.MovieDto;
 import com.forthwall.cinema.movie.service.dto.MovieTimeSessionDto;
 import com.forthwall.cinema.movie.application.view.request.MovieTimeViewRequest;
+import com.forthwall.cinema.movie.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,12 +51,12 @@ public class MovieController {
      */
     @GetMapping(MOVIES_SESSION)
     public ResponseEntity<List<MovieTimeSessionViewResponse>> movieSessionsByDate(
-        @RequestParam(value = "idMovie") Long idMovie,
-        @RequestParam(value = "date") String date) {
+        @RequestParam(value = "idMovie", required = false) Long idMovie,
+        @RequestParam(value = "date", required = false) String date) {
         try {
             MovieTimeSessionDto dto = new MovieTimeSessionDto();
             dto.setIdMovie(idMovie);
-            dto.setTimeMovie(LocalDateTime.parse(date));
+            dto.setTimeMovie(LocalDateTime.parse(date, DateUtils.getDateTimeFormatter()));
             if (idMovie == null && date != null) {
                 List<MovieTimeSessionDto> dtoResponse = movieServiceImpl.getMoviesByDate(LocalDate.parse(date));
                 List<MovieTimeSessionViewResponse> response = prepareListOfMoviesSessionResponse(dtoResponse);
@@ -63,7 +64,7 @@ public class MovieController {
             }
             MovieTimeSessionDto dtoResponse = movieServiceImpl.getMovieByIdAndDate(dto);
             if (dtoResponse != null) {
-                MovieTimeSessionViewResponse response = new MovieTimeSessionViewResponse(dtoResponse.getIdMovie(),
+                MovieTimeSessionViewResponse response = new MovieTimeSessionViewResponse(
                     dtoResponse.getName(), dtoResponse.getRooms(), dtoResponse.getDateMovie(), dtoResponse.getTimeMovie().toString());
                 return new ResponseEntity(response, HttpStatus.OK);
             }

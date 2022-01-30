@@ -59,9 +59,11 @@ public class MovieServiceImpl implements MovieService {
         for (MovieSessionEntity entity: entities
         ) {
             MovieTimeSessionDto dto = new MovieTimeSessionDto();
+            dto.setIdMovie(entity.getMovie().getIdMovie());
             dto.setName(entity.getMovie().getNameMovie());
             dto.setRooms(entity.getRoom());
             dto.setTimeMovie(entity.getSessionTime());
+            dto.setDateMovie(entity.getSessionDate());
             response.add(dto);
         }
         return response;

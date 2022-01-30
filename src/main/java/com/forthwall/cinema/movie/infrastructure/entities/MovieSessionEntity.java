@@ -3,7 +3,7 @@ package com.forthwall.cinema.movie.infrastructure.entities;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.math.BigInteger;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import javax.persistence.Column;
@@ -36,7 +36,7 @@ public class MovieSessionEntity {
     @Column(name = "session_time")
     private LocalDateTime sessionTime;
     @Column(name = "price")
-    private BigInteger price;
+    private BigDecimal price;
     @Column(name = "room")
     private String room;
     @Column(name = "session_date")
