@@ -12,6 +12,7 @@ import com.forthwall.cinema.movie.service.dto.MovieTimeSessionDto;
 import com.forthwall.cinema.movie.application.view.request.MovieTimeRequest;
 import com.forthwall.cinema.movie.service.dto.ReviewDto;
 import com.forthwall.cinema.movie.utils.DateUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -30,12 +31,14 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.logging.Logger;
+import javax.validation.Valid;
 
 /**
  * Controller responsible for managing movie request.
  * This controller should handle all the movie request
  */
+@Slf4j
 @RestController
 public class MovieController {
 
@@ -122,16 +125,17 @@ public class MovieController {
      * This endpoint is used to update a session price and dateTime. It means that a movie is shown in a certain
      * movie session which contains the price of the session. The price will vary depending if the Session
      * if on Friday night or at 14 on a working day.
-     *
+     * <p>
      * Ex for price update :curl -X PUT \
-     *   'http://localhost:8080/admin/movie?idSession=2&price=50' \
-     *   -H 'bearer: 1234' \
-     *   -H 'cache-control: no-cache' \
+     * 'http://localhost:8080/admin/movie?idSession=2&price=50' \
+     * -H 'bearer: 1234' \
+     * -H 'cache-control: no-cache' \
      * Ex for time update:
      * curl -X PUT \
-     *   'http://localhost:8080/admin/movie?idSession=2&dateTimeSession=2030-04-01%2015%3A20%3A00' \
-     *   -H 'bearer: 1234' \
-     *   -H 'cache-control: no-cache' \
+     * 'http://localhost:8080/admin/movie?idSession=2&dateTimeSession=2030-04-01%2015%3A20%3A00' \
+     * -H 'bearer: 1234' \
+     * -H 'cache-control: no-cache' \
+     *
      * @param idSession       id of the session in which the movie will shown
      * @param dateTimeSession date and wimt to which the movie should be updated
      * @param price           price to which the movie should be updated.
@@ -144,29 +148,34 @@ public class MovieController {
         @RequestParam(name = "idSession") Long idSession,
         @RequestParam(name = "dateTimeSession", required = false) String dateTimeSession,
         @RequestParam(name = "price", required = false) BigDecimal price
-        ) {
-
+    ) {
+        log.info("Admin request arrived");
         if (token != null && token.equals(tokeService.getToken())) {
+            log.debug("Token validated");
+            try {
+                MovieTimeSessionDto timeSessionDto = new MovieTimeSessionDto();
+                timeSessionDto.setIdSession(idSession);
 
-        try {
-            MovieTimeSessionDto timeSessionDto = new MovieTimeSessionDto();
-            timeSessionDto.setIdSession(idSession);
+                if (dateTimeSession != null) {
+                    log.debug("Preparing to update date and time of the Session");
+                    timeSessionDto.setTimeMovie(LocalDateTime.parse(dateTimeSession, DateUtils.getDateTimeFormatter()));
+                    timeSessionDto.setDateMovie(LocalDateTime.parse(dateTimeSession, DateUtils.getDateTimeFormatter()).toLocalDate());
+                    log.debug("Calling movie service for update");
+                    movieServiceImpl.updateMovieTimeSession(timeSessionDto);
+                }
+                if (price != null) {
+                    log.debug("Preparing to update price of the Session");
+                    timeSessionDto.setPrice(price);
+                    movieServiceImpl.updateMoviePriceSession(timeSessionDto);
+                }
+                return new ResponseEntity<>(HttpStatus.OK);
 
-            if (dateTimeSession != null) {
-                timeSessionDto.setTimeMovie(LocalDateTime.parse(dateTimeSession, DateUtils.getDateTimeFormatter()));
-                timeSessionDto.setDateMovie(LocalDateTime.parse(dateTimeSession, DateUtils.getDateTimeFormatter()).toLocalDate());
-                movieServiceImpl.updateMovieTimeSession(timeSessionDto);
+            } catch (RuntimeException e) {
+                log.warn(e.getMessage());
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
             }
-            if (price != null) {
-                timeSessionDto.setPrice(price);
-                movieServiceImpl.updateMoviePriceSession(timeSessionDto);
-            }
-            return new ResponseEntity<>(HttpStatus.OK);
-
-        } catch (RuntimeException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
         } else {
+            log.warn("Token unauthorized");
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
     }
@@ -189,7 +198,7 @@ public class MovieController {
      * <500>Error</500>
      */
     @PostMapping(value = REVIEW, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity createReview(@RequestBody ReviewRequest request) {
+    public ResponseEntity createReview(@Valid @RequestBody ReviewRequest request) {
         try {
             ReviewDto dto = new ReviewDto();
             dto.setComment(request.getComment());
