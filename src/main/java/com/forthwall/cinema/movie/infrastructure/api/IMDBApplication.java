@@ -2,6 +2,7 @@ package com.forthwall.cinema.movie.infrastructure.api;
 
 import com.forthwall.cinema.movie.infrastructure.api.dto.ResponseIMDBDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,9 @@ public class IMDBApplication implements ExternalWeb {
     RestTemplate restTemplate;
     private static final String IMDB_URL = "http://www.omdbapi.com/";
 
+    @Value("${IMDB_API_KEY}")
+    private String imdbApiKey;
+
     @Autowired
     public IMDBApplication(RestTemplateBuilder builder) {
         this.restTemplate = builder.build();
@@ -25,7 +29,7 @@ public class IMDBApplication implements ExternalWeb {
         HttpURLConnection con = null;
         try {
             String urlTemplate = UriComponentsBuilder.fromHttpUrl(IMDB_URL)
-                .queryParam("apiKey", "e4f33820")
+                .queryParam("apiKey", imdbApiKey)
                 .queryParam("i", id)
                 .encode()
                 .toUriString();
