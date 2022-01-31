@@ -3,6 +3,7 @@ package com.forthwall.cinema.movie.infrastructure.entities;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,7 +24,8 @@ import javax.persistence.Table;
 @Table(name = "movie_session")
 @Getter
 @Setter
-public class MovieSessionEntity {
+public class MovieSessionEntity implements Serializable {
+    private static final long serialVersionUID = 4L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

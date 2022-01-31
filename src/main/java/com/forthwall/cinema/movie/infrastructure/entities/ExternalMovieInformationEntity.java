@@ -3,6 +3,7 @@ package com.forthwall.cinema.movie.infrastructure.entities;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -16,7 +17,8 @@ import javax.persistence.Table;
 @Table(name = "external_movie_description_storage")
 @Getter
 @Setter
-public class ExternalMovieInformationEntity {
+public class ExternalMovieInformationEntity implements Serializable {
+    private static final long serialVersionUID = 2L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
