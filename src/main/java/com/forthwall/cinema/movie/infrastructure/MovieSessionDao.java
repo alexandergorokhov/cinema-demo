@@ -26,10 +26,12 @@ public interface MovieSessionDao extends JpaRepository<MovieSessionEntity, Long>
 
     @Query(value = QUERY_BY_SESSION_DATE, nativeQuery = true)
     List<MovieSessionEntity> findByDate(@Param("date") LocalDate date);
+
     @Modifying
     @Query(value = UPDATE_TIME, nativeQuery = true)
     void updateDate(@Param("session_date") LocalDate date,
-        @Param("session_time") LocalTime time,@Param("id_session") Long idSession);
+        @Param("session_time") LocalTime time, @Param("id_session") Long idSession);
+
     @Modifying
     @Query(value = UPDATE_PRICE, nativeQuery = true)
     void updatePriceById(@Param("price") BigDecimal price,

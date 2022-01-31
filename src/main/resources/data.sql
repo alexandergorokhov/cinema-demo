@@ -23,3 +23,14 @@ INSERT INTO MOVIE_REVIEW (id_movie,stars,comment) VALUES
   (3,9,'smart'),
   (4,4,'Harry Potter');
 
+INSERT INTO EXTERNAL_MOVIE_DESCRIPTION_STORAGE (id_movie,id_external,name_external_provider) VALUES
+  (1,'tt0232500','OMDB'),
+  (2,'tt0322259','OMDB'),
+  (3,'tt0463985','OMDB'),
+  (4,'tt0232500','OMDB'),
+  (5,'tt1596343','OMDB'),
+  (6,'tt1905041','OMDB'),
+  (7,'tt2820852','OMDB'),
+  (8,'tt4630562','OMDB'),
+  (9,'tt5433138','OMDB');
+

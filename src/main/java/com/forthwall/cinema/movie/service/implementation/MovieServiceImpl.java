@@ -1,10 +1,12 @@
 package com.forthwall.cinema.movie.service.implementation;
 
+import com.forthwall.cinema.movie.infrastructure.ExternalMovieInformationDao;
 import com.forthwall.cinema.movie.infrastructure.MovieDao;
 import com.forthwall.cinema.movie.infrastructure.MovieReviewDao;
 import com.forthwall.cinema.movie.infrastructure.MovieSessionDao;
 import com.forthwall.cinema.movie.infrastructure.api.ExternalWeb;
 import com.forthwall.cinema.movie.infrastructure.api.dto.ResponseIMDBDto;
+import com.forthwall.cinema.movie.infrastructure.entities.ExternalMovieInformationEntity;
 import com.forthwall.cinema.movie.infrastructure.entities.MovieEntity;
 import com.forthwall.cinema.movie.infrastructure.entities.MovieReviewEntity;
 import com.forthwall.cinema.movie.infrastructure.entities.MovieSessionEntity;
@@ -20,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 public class MovieServiceImpl implements MovieService {
@@ -28,21 +29,18 @@ public class MovieServiceImpl implements MovieService {
     private MovieDao movieDao;
     private MovieReviewDao movieReviewDao;
     private ExternalWeb externalWeb;
+    private ExternalMovieInformationDao externalMovieInformationDao;
 
     @Autowired
     public MovieServiceImpl(MovieSessionDao movieSessionDao, MovieDao movieDao, MovieReviewDao movieReviewDao,
-        ExternalWeb externalWeb) {
+        ExternalWeb externalWeb, ExternalMovieInformationDao externalMovieInformationDao) {
         this.movieSessionDao = movieSessionDao;
         this.movieDao = movieDao;
         this.movieReviewDao = movieReviewDao;
         this.externalWeb = externalWeb;
+        this.externalMovieInformationDao = externalMovieInformationDao;
     }
 
-    @Override
-    public MovieTimeSessionDto getMovieByIdAndDate(MovieTimeSessionDto movieTimeSessionDto) {
-        //movieSessionDao
-        return null;
-    }
 
     /**
      * @return returns all movies in a List that are in the DB
@@ -109,13 +107,20 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @Override
-    public MovieDescriptionDto getMovieDescription(Long movieId) {
-        // call local DB to check if the movie is there
-        return null;
+    public MovieDescriptionDto getMovieDescriptionById(Long movieId) {
+        ExternalMovieInformationEntity entity = externalMovieInformationDao.findByMovieId(movieId);
+        MovieDescriptionDto movieDescriptionDto = getMovieDescriptionByExternalId(entity.getIdExternal());
+        return movieDescriptionDto;
     }
 
     @Override
     public MovieDescriptionDto getMovieDescriptionByExternalId(String idMovie) {
+        MovieDescriptionDto movieDescriptionDto = getMovieDescriptionFromExternal(idMovie);
+
+        return movieDescriptionDto;
+    }
+
+    private MovieDescriptionDto getMovieDescriptionFromExternal(String idMovie) {
         ResponseIMDBDto dto = externalWeb.getDescriptionById(idMovie);
         MovieDescriptionDto movieDescriptionDto =  new MovieDescriptionDto();
         movieDescriptionDto.setName(dto.getName());
@@ -132,7 +137,6 @@ public class MovieServiceImpl implements MovieService {
 
         }
         movieDescriptionDto.setRating(ratingList);
-
         return movieDescriptionDto;
     }
 }

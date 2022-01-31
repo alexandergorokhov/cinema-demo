@@ -10,8 +10,6 @@ import java.util.List;
 
 public interface MovieService {
 
-    MovieTimeSessionDto getMovieByIdAndDate(MovieTimeSessionDto movieTimeSessionDto);
-
     List<MovieDto> getAllMovies();
 
     List<MovieTimeSessionDto> getMoviesByDate(LocalDate date);
@@ -22,7 +20,7 @@ public interface MovieService {
 
     void saveReview(ReviewDto dto);
 
-    MovieDescriptionDto getMovieDescription(Long movieId);
+    MovieDescriptionDto getMovieDescriptionById(Long movieId);
 
     MovieDescriptionDto getMovieDescriptionByExternalId(String idMovie);
 }

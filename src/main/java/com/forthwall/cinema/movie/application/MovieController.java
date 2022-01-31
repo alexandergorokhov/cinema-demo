@@ -74,12 +74,6 @@ public class MovieController {
                 List<MovieTimeSessionViewResponse> response = prepareListOfMoviesSessionResponse(dtoResponse);
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
-            MovieTimeSessionDto dtoResponse = movieServiceImpl.getMovieByIdAndDate(dto);
-            if (dtoResponse != null) {
-                MovieTimeSessionViewResponse response = new MovieTimeSessionViewResponse(
-                    dtoResponse.getName(), dtoResponse.getRooms(), dtoResponse.getDateMovie(), dtoResponse.getTimeMovie().toString());
-                return new ResponseEntity(response, HttpStatus.OK);
-            }
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (RuntimeException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -156,13 +150,25 @@ public class MovieController {
         }
     }
 
+    /**
+     * This method if provided just internal movieId with retrieve the exteranl
+     * movie id form the DB and return a description provided by external API.
+     *  If external identificator is provided directly, it will consult the exteranl API without
+     *  local DB validation.
+     * @param idMovie Internal id movie
+     * @param iMBDmovieId External applicaiton Id movie
+     * @return Response Entity.
+     * <200>MovieDescriptionResponse</200>
+     * <400>Bad Request</400>
+     * <500>Server Error</500>
+     */
     @GetMapping(DESCRIPTION)
     public ResponseEntity<MovieDescriptionResponse> getMovieDescriptionResponse(@RequestParam(name = "idMovie", required = false) Long idMovie,
-        @RequestParam(name = "idMovieIMDb", required = false) String iMBDvieId) {
+        @RequestParam(name = "idMovieIMDb", required = false) String iMBDmovieId) {
 
         try {
             if (idMovie != null) {
-                MovieDescriptionDto dto = movieServiceImpl.getMovieDescription(idMovie);
+                MovieDescriptionDto dto = movieServiceImpl.getMovieDescriptionById(idMovie);
                 MovieDescriptionResponse response = new MovieDescriptionResponse();
                 response.setName(dto.getName());
                 response.setDescription(dto.getDescription());
@@ -171,8 +177,8 @@ public class MovieController {
                 response.setRuntime(dto.getRuntime());
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
-            if (iMBDvieId != null) {
-                MovieDescriptionDto dto = movieServiceImpl.getMovieDescriptionByExternalId(iMBDvieId);
+            if (iMBDmovieId != null) {
+                MovieDescriptionDto dto = movieServiceImpl.getMovieDescriptionByExternalId(iMBDmovieId);
                 MovieDescriptionResponse response = new MovieDescriptionResponse();
                 response.setName(dto.getName());
                 response.setDescription(dto.getDescription());
