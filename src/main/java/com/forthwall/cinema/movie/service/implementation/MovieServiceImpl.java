@@ -3,10 +3,13 @@ package com.forthwall.cinema.movie.service.implementation;
 import com.forthwall.cinema.movie.infrastructure.MovieDao;
 import com.forthwall.cinema.movie.infrastructure.MovieReviewDao;
 import com.forthwall.cinema.movie.infrastructure.MovieSessionDao;
+import com.forthwall.cinema.movie.infrastructure.api.ExternalWeb;
+import com.forthwall.cinema.movie.infrastructure.api.dto.ResponseIMDBDto;
 import com.forthwall.cinema.movie.infrastructure.entities.MovieEntity;
 import com.forthwall.cinema.movie.infrastructure.entities.MovieReviewEntity;
 import com.forthwall.cinema.movie.infrastructure.entities.MovieSessionEntity;
 import com.forthwall.cinema.movie.service.MovieService;
+import com.forthwall.cinema.movie.service.dto.MovieDescriptionDto;
 import com.forthwall.cinema.movie.service.dto.MovieDto;
 import com.forthwall.cinema.movie.service.dto.MovieTimeSessionDto;
 import com.forthwall.cinema.movie.service.dto.ReviewDto;
@@ -24,12 +27,15 @@ public class MovieServiceImpl implements MovieService {
     private MovieSessionDao movieSessionDao;
     private MovieDao movieDao;
     private MovieReviewDao movieReviewDao;
+    private ExternalWeb externalWeb;
 
     @Autowired
-    public MovieServiceImpl(MovieSessionDao movieSessionDao, MovieDao movieDao, MovieReviewDao movieReviewDao) {
+    public MovieServiceImpl(MovieSessionDao movieSessionDao, MovieDao movieDao, MovieReviewDao movieReviewDao,
+        ExternalWeb externalWeb) {
         this.movieSessionDao = movieSessionDao;
         this.movieDao = movieDao;
         this.movieReviewDao = movieReviewDao;
+        this.externalWeb = externalWeb;
     }
 
     @Override
@@ -75,11 +81,12 @@ public class MovieServiceImpl implements MovieService {
         }
         return response;
     }
+
     @Transactional
     @Override
     public void updateMovieTimeSession(MovieTimeSessionDto timeSessionDto) {
         MovieSessionEntity sessionEntity = movieSessionDao.findById(timeSessionDto.getIdSession()).orElseThrow();
-        movieSessionDao.updateDate(timeSessionDto.getDateMovie(),timeSessionDto.getTimeMovie().toLocalTime(),
+        movieSessionDao.updateDate(timeSessionDto.getDateMovie(), timeSessionDto.getTimeMovie().toLocalTime(),
             sessionEntity.getIdSession());
     }
 
@@ -87,18 +94,45 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public void updateMoviePriceSession(MovieTimeSessionDto timeSessionDto) {
         MovieSessionEntity sessionEntity = movieSessionDao.findById(timeSessionDto.getIdSession()).orElseThrow();
-        movieSessionDao.updatePriceById(timeSessionDto.getPrice(),sessionEntity.getIdSession());
+        movieSessionDao.updatePriceById(timeSessionDto.getPrice(), sessionEntity.getIdSession());
     }
 
     @Override
     public void saveReview(ReviewDto dto) {
-        MovieReviewEntity entity =  new MovieReviewEntity();
+        MovieReviewEntity entity = new MovieReviewEntity();
         MovieEntity movieEntity = new MovieEntity();
         movieEntity.setIdMovie(dto.getIdMovie());
         entity.setMovie(movieEntity);
         entity.setComment(dto.getComment());
         entity.setStars(dto.getStars());
         movieReviewDao.save(entity);
+    }
 
+    @Override
+    public MovieDescriptionDto getMovieDescription(Long movieId) {
+        // call local DB to check if the movie is there
+        return null;
+    }
+
+    @Override
+    public MovieDescriptionDto getMovieDescriptionByExternalId(String idMovie) {
+        ResponseIMDBDto dto = externalWeb.getDescriptionById(idMovie);
+        MovieDescriptionDto movieDescriptionDto =  new MovieDescriptionDto();
+        movieDescriptionDto.setName(dto.getName());
+        movieDescriptionDto.setDescription(dto.getDescription());
+        movieDescriptionDto.setReleaseDate(dto.getReleaseDate());
+        movieDescriptionDto.setRuntime(dto.getRuntime());
+        movieDescriptionDto.setIMDGRating(dto.getIMDGRating());
+        ArrayList<MovieDescriptionDto.Rating> ratingList = new ArrayList();
+        for (ResponseIMDBDto.Rating ratingDto: dto.getRating()) {
+           MovieDescriptionDto.Rating rating =  new MovieDescriptionDto.Rating() ;
+           rating.setSource(ratingDto.getSource());
+           rating.setValue(ratingDto.getValue());
+           ratingList.add(rating);
+
+        }
+        movieDescriptionDto.setRating(ratingList);
+
+        return movieDescriptionDto;
     }
 }

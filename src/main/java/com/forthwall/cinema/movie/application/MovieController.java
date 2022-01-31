@@ -1,9 +1,11 @@
 package com.forthwall.cinema.movie.application;
 
 import com.forthwall.cinema.movie.application.view.request.ReviewRequest;
+import com.forthwall.cinema.movie.application.view.response.MovieDescriptionResponse;
 import com.forthwall.cinema.movie.application.view.response.MovieViewResponse;
 import com.forthwall.cinema.movie.application.view.response.MovieTimeSessionViewResponse;
 import com.forthwall.cinema.movie.service.MovieService;
+import com.forthwall.cinema.movie.service.dto.MovieDescriptionDto;
 import com.forthwall.cinema.movie.service.dto.MovieDto;
 import com.forthwall.cinema.movie.service.dto.MovieTimeSessionDto;
 import com.forthwall.cinema.movie.application.view.request.MovieTimeRequest;
@@ -41,6 +43,8 @@ public class MovieController {
     private static final String MOVIES_SESSION = "movieSession";
     private static final String MOVIE = "movie";
     private static final String REVIEW = "review";
+    private static final String DESCRIPTION = "description";
+
 
 
     @Autowired
@@ -132,6 +136,12 @@ public class MovieController {
         }
     }
 
+    /**
+     * @param request {@link ReviewRequest} body request  containing the review information
+     * @return Response Entity
+     * <200>Saved</200>
+     * <500>Error</500>
+     */
     @PostMapping(REVIEW)
     public ResponseEntity createReview(@RequestBody ReviewRequest request) {
         try {
@@ -141,11 +151,51 @@ public class MovieController {
             dto.setIdMovie(request.getIdMovie());
             movieServiceImpl.saveReview(dto);
             return new ResponseEntity(HttpStatus.OK);
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping(DESCRIPTION)
+    public ResponseEntity<MovieDescriptionResponse> getMovieDescriptionResponse(@RequestParam(name = "idMovie", required = false) Long idMovie,
+        @RequestParam(name = "idMovieIMDb", required = false) String iMBDvieId) {
+
+        try {
+            if (idMovie != null) {
+                MovieDescriptionDto dto = movieServiceImpl.getMovieDescription(idMovie);
+                MovieDescriptionResponse response = new MovieDescriptionResponse();
+                response.setName(dto.getName());
+                response.setDescription(dto.getDescription());
+                response.setReleaseDate(dto.getReleaseDate());
+                response.setIMDGRating(dto.getIMDGRating());
+                response.setRuntime(dto.getRuntime());
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            }
+            if (iMBDvieId != null) {
+                MovieDescriptionDto dto = movieServiceImpl.getMovieDescriptionByExternalId(iMBDvieId);
+                MovieDescriptionResponse response = new MovieDescriptionResponse();
+                response.setName(dto.getName());
+                response.setDescription(dto.getDescription());
+                response.setReleaseDate(dto.getReleaseDate());
+                response.setIMDGRating(dto.getIMDGRating());
+                response.setRuntime(dto.getRuntime());
+                ArrayList ratingList = new ArrayList();
+                for (MovieDescriptionDto.Rating ratingDto: dto.getRating()
+                ) {
+                    MovieDescriptionResponse.Rating rating = new MovieDescriptionResponse.Rating() ;
+                    rating.setSource(ratingDto.getSource());
+                    rating.setValue(ratingDto.getValue());
+                    ratingList.add(rating);
+                }
+                response.setRating(ratingList);
+
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            }
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         } catch (RuntimeException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
     }
 
     private List<MovieViewResponse> prepareListOfMoviesResponse(List<MovieDto> listDto) {

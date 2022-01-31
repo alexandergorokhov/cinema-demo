@@ -1,5 +1,6 @@
 package com.forthwall.cinema.movie.service;
 
+import com.forthwall.cinema.movie.service.dto.MovieDescriptionDto;
 import com.forthwall.cinema.movie.service.dto.MovieDto;
 import com.forthwall.cinema.movie.service.dto.MovieTimeSessionDto;
 import com.forthwall.cinema.movie.service.dto.ReviewDto;
@@ -20,4 +21,8 @@ public interface MovieService {
     void updateMoviePriceSession(MovieTimeSessionDto timeSessionDto);
 
     void saveReview(ReviewDto dto);
+
+    MovieDescriptionDto getMovieDescription(Long movieId);
+
+    MovieDescriptionDto getMovieDescriptionByExternalId(String idMovie);
 }
