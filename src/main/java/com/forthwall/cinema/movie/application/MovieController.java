@@ -5,6 +5,7 @@ import com.forthwall.cinema.movie.application.view.response.MovieDescriptionResp
 import com.forthwall.cinema.movie.application.view.response.MovieViewResponse;
 import com.forthwall.cinema.movie.application.view.response.MovieTimeSessionViewResponse;
 import com.forthwall.cinema.movie.service.MovieService;
+import com.forthwall.cinema.movie.service.TokeService;
 import com.forthwall.cinema.movie.service.dto.MovieDescriptionDto;
 import com.forthwall.cinema.movie.service.dto.MovieDto;
 import com.forthwall.cinema.movie.service.dto.MovieTimeSessionDto;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -28,6 +30,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Controller responsible for managing movie request.
@@ -40,25 +43,28 @@ public class MovieController {
      * Movie service responsible for managing movie information
      */
     MovieService movieServiceImpl;
+    TokeService tokeService;
     private static final String MOVIES = "movies";
     private static final String MOVIES_SESSION = "movieSession";
     private static final String MOVIE = "movie";
     private static final String REVIEW = "review";
     private static final String DESCRIPTION = "description";
+    private static final String ADMIN = "admin/";
 
 
     @Autowired
-    public MovieController(MovieService movieServiceImpl) {
+    public MovieController(MovieService movieServiceImpl, TokeService tokeService) {
         this.movieServiceImpl = movieServiceImpl;
+        this.tokeService = tokeService;
     }
 
     /**
      * This endpoint will provide users with information about all the movie sessions (movie session = movie played, time ,room, price) for the
      * specified date.
-     *
+     * <p>
      * EX: curl -X GET \
-     *   'http://localhost:8080/movieSession?date=2022-02-03' \
-     *   -H 'cache-control: no-cache' \
+     * 'http://localhost:8080/movieSession?date=2022-02-03' \
+     * -H 'cache-control: no-cache' \
      *
      * @param idMovie Id of the movie to be viewed
      * @param date    Date of the movie to which the availability wants to be known.
@@ -91,14 +97,15 @@ public class MovieController {
      * This endpoint will provide all the movies (id, name) available in the database.
      * Mostly used for internal testing.
      * EX: curl -X GET \
-     *   http://localhost:8080/movies \
-     *   -H 'cache-control: no-cache' \
-     *   -H 'content-type: application/json'
+     * http://localhost:8080/movies \
+     * -H 'cache-control: no-cache' \
+     * -H 'content-type: application/json'
+     *
      * @return List of all the movies {@link MovieTimeSessionViewResponse}
      * <>200</> OK
      * <>500</> Internal Server Error
      */
-    @GetMapping(value = MOVIES,produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = MOVIES, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<MovieViewResponse>> movies() {
         try {
             List<MovieDto> movies = movieServiceImpl.getAllMovies();
@@ -116,6 +123,15 @@ public class MovieController {
      * movie session which contains the price of the session. The price will vary depending if the Session
      * if on Friday night or at 14 on a working day.
      *
+     * Ex for price update :curl -X PUT \
+     *   'http://localhost:8080/admin/movie?idSession=2&price=50' \
+     *   -H 'bearer: 1234' \
+     *   -H 'cache-control: no-cache' \
+     * Ex for time update:
+     * curl -X PUT \
+     *   'http://localhost:8080/admin/movie?idSession=2&dateTimeSession=2030-04-01%2015%3A20%3A00' \
+     *   -H 'bearer: 1234' \
+     *   -H 'cache-control: no-cache' \
      * @param idSession       id of the session in which the movie will shown
      * @param dateTimeSession date and wimt to which the movie should be updated
      * @param price           price to which the movie should be updated.
@@ -123,10 +139,15 @@ public class MovieController {
      * <200>OK<200/>
      * <500>Error</500>
      */
-    @PutMapping(value = MOVIE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity updateMovie(@RequestParam(name = "idSession") Long idSession,
+    @PutMapping(value = ADMIN + MOVIE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity updateMovie(@RequestHeader(value = "Bearer") String token,
+        @RequestParam(name = "idSession") Long idSession,
         @RequestParam(name = "dateTimeSession", required = false) String dateTimeSession,
-        @RequestParam(name = "price", required = false) BigDecimal price) {
+        @RequestParam(name = "price", required = false) BigDecimal price
+        ) {
+
+        if (token != null && token.equals(tokeService.getToken())) {
+
         try {
             MovieTimeSessionDto timeSessionDto = new MovieTimeSessionDto();
             timeSessionDto.setIdSession(idSession);
@@ -145,19 +166,23 @@ public class MovieController {
         } catch (RuntimeException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+        } else {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
     }
 
     /**
      * This endpoint is used to post reviews.
      * Ex: curl -X POST \
-     *   http://localhost:8080/review \
-     *   -H 'cache-control: no-cache' \
-     *   -H 'content-type: application/json' \
-     *   -d '{
+     * http://localhost:8080/review \
+     * -H 'cache-control: no-cache' \
+     * -H 'content-type: application/json' \
+     * -d '{
      * "idMovie":3,
      * "stars":1,
      * "comment":"Nice"
      * }'
+     *
      * @param request {@link ReviewRequest} body request  containing the review information
      * @return Response Entity
      * <200>Saved</200>
@@ -181,13 +206,14 @@ public class MovieController {
      * This endpoint if provided just internal movieId will retrieve the external
      * movie id form the DB and return a description provided by external API.
      * EX: curl -X GET \
-     *   'http://localhost:8080/description?idMovie=3' \
-     *   -H 'cache-control: no-cache' \
+     * 'http://localhost:8080/description?idMovie=3' \
+     * -H 'cache-control: no-cache' \
      * If external identification is provided directly, it will consult the externalAPI without
      * local DB validation.
      * Ex: curl -X GET \
-     *   'http://localhost:8080/description?idMovieIMDb=tt0232500' \
-     *   -H 'cache-control: no-cache' \
+     * 'http://localhost:8080/description?idMovieIMDb=tt0232500' \
+     * -H 'cache-control: no-cache' \
+     *
      * @param idMovie     Internal id movie
      * @param idMovieIMDb External applicaiton Id movie
      * @return Response Entity.
