@@ -12,6 +12,12 @@ import com.forthwall.cinema.movie.service.dto.MovieTimeSessionDto;
 import com.forthwall.cinema.movie.application.view.request.MovieTimeRequest;
 import com.forthwall.cinema.movie.service.dto.ReviewDto;
 import com.forthwall.cinema.movie.utils.DateUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -73,10 +79,18 @@ public class MovieController {
      * @param date    Date of the movie to which the availability wants to be known.
      * @return {@link MovieTimeRequest}. Is a response object that contains
      * information about movie time, rooms , prices  for desired date.
-     * <>200</> - return information
+     * <>200</> - return information of movie sessions
      * <>204<</> - no information was found
      * <>500</> -  error
      */
+    @Operation(summary = "This endpoint will provide users with information about all the movie sessions (movie session = movie played, time ,room, price) for the specified date.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Return information about all movie sesisons",
+            content = {@Content(mediaType = "application/json",
+                schema = @Schema(implementation = MovieTimeSessionViewResponse.class))}),
+        @ApiResponse(responseCode = "204", description = "No movie sessions were found", content = @Content),
+        @ApiResponse(responseCode = "500", description = "Error", content = @Content
+        )})
     @GetMapping(value = MOVIES_SESSION, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<MovieTimeSessionViewResponse>> movieSessionsByDate(
         @RequestParam(value = "idMovie", required = false) Long idMovie,
@@ -108,6 +122,15 @@ public class MovieController {
      * <>200</> OK
      * <>500</> Internal Server Error
      */
+    @Operation(summary = "This endpoint will provide all the movies (id, name) available in the database.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Return information about all movie sesisons",
+            content = {@Content(mediaType = "application/json",
+                array = @ArraySchema(schema = @Schema(implementation = MovieTimeSessionViewResponse.class))
+            )}),
+        @ApiResponse(responseCode = "204", description = "No movie sessions were found", content = @Content),
+        @ApiResponse(responseCode = "500", description = "Error", content = @Content
+        )})
     @GetMapping(value = MOVIES, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<MovieViewResponse>> movies() {
         try {
@@ -141,8 +164,17 @@ public class MovieController {
      * @param price           price to which the movie should be updated.
      * @return Response entity
      * <200>OK<200/>
+     * <403>Unauthorized</403>
      * <500>Error</500>
      */
+    @Operation(summary = " This endpoint is used to update a session price and dateTime. "
+        + "It means that a movie is shown in a certain movie session which contains the price of the session.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "operation successful",
+            content = @Content),
+        @ApiResponse(responseCode = "401", description = "Not Authorized", content = @Content),
+        @ApiResponse(responseCode = "500", description = "Error", content = @Content
+        )})
     @PutMapping(value = ADMIN + MOVIE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity updateMovie(@RequestHeader(value = "Bearer") String token,
         @RequestParam(name = "idSession") Long idSession,
@@ -197,6 +229,12 @@ public class MovieController {
      * <200>Saved</200>
      * <500>Error</500>
      */
+    @Operation(summary = "This endpoint is used to post reviews.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "operation successful",
+            content = @Content),
+        @ApiResponse(responseCode = "500", description = "Error", content = @Content
+        )})
     @PostMapping(value = REVIEW, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity createReview(@Valid @RequestBody ReviewRequest request) {
         try {
@@ -230,6 +268,16 @@ public class MovieController {
      * <400>Bad Request</400>
      * <500>Server Error</500>
      */
+    @Operation(summary = "This endpoint if provided just internal movieId will retrieve the external "
+        + "movie id form the DB and return a description provided by external API.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "operation successful",
+            content = {@Content(mediaType = "application/json",
+                schema = @Schema(implementation = MovieDescriptionResponse.class))}),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content
+        ),
+        @ApiResponse(responseCode = "500", description = "Error", content = @Content
+        )})
     @GetMapping(value = DESCRIPTION, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MovieDescriptionResponse> getMovieDescriptionResponse(@RequestParam(name = "idMovie", required = false) Long idMovie,
         @RequestParam(name = "idMovieIMDb", required = false) String idMovieIMDb) {
