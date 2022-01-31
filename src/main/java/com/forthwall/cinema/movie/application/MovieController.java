@@ -13,6 +13,7 @@ import com.forthwall.cinema.movie.service.dto.ReviewDto;
 import com.forthwall.cinema.movie.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Controller responsibly for managing movie request.
+ * Controller responsible for managing movie request.
  * This controller should handle all the movie request
  */
 @RestController
@@ -46,13 +47,19 @@ public class MovieController {
     private static final String DESCRIPTION = "description";
 
 
-
     @Autowired
     public MovieController(MovieService movieServiceImpl) {
         this.movieServiceImpl = movieServiceImpl;
     }
 
     /**
+     * This endpoint will provide users with information about all the movie sessions (movie session = movie played, time ,room, price) for the
+     * specified date.
+     *
+     * EX: curl -X GET \
+     *   'http://localhost:8080/movieSession?date=2022-02-03' \
+     *   -H 'cache-control: no-cache' \
+     *
      * @param idMovie Id of the movie to be viewed
      * @param date    Date of the movie to which the availability wants to be known.
      * @return {@link MovieTimeRequest}. Is a response object that contains
@@ -61,7 +68,7 @@ public class MovieController {
      * <>204<</> - no information was found
      * <>500</> -  error
      */
-    @GetMapping(MOVIES_SESSION)
+    @GetMapping(value = MOVIES_SESSION, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<MovieTimeSessionViewResponse>> movieSessionsByDate(
         @RequestParam(value = "idMovie", required = false) Long idMovie,
         @RequestParam(value = "date", required = false) String date) {
@@ -81,11 +88,17 @@ public class MovieController {
     }
 
     /**
+     * This endpoint will provide all the movies (id, name) available in the database.
+     * Mostly used for internal testing.
+     * EX: curl -X GET \
+     *   http://localhost:8080/movies \
+     *   -H 'cache-control: no-cache' \
+     *   -H 'content-type: application/json'
      * @return List of all the movies {@link MovieTimeSessionViewResponse}
      * <>200</> OK
      * <>500</> Internal Server Error
      */
-    @GetMapping(MOVIES)
+    @GetMapping(value = MOVIES,produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<MovieViewResponse>> movies() {
         try {
             List<MovieDto> movies = movieServiceImpl.getAllMovies();
@@ -99,6 +112,10 @@ public class MovieController {
     }
 
     /**
+     * This endpoint is used to update a session price and dateTime. It means that a movie is shown in a certain
+     * movie session which contains the price of the session. The price will vary depending if the Session
+     * if on Friday night or at 14 on a working day.
+     *
      * @param idSession       id of the session in which the movie will shown
      * @param dateTimeSession date and wimt to which the movie should be updated
      * @param price           price to which the movie should be updated.
@@ -106,7 +123,7 @@ public class MovieController {
      * <200>OK<200/>
      * <500>Error</500>
      */
-    @PutMapping(MOVIE)
+    @PutMapping(value = MOVIE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity updateMovie(@RequestParam(name = "idSession") Long idSession,
         @RequestParam(name = "dateTimeSession", required = false) String dateTimeSession,
         @RequestParam(name = "price", required = false) BigDecimal price) {
@@ -131,12 +148,22 @@ public class MovieController {
     }
 
     /**
+     * This endpoint is used to post reviews.
+     * Ex: curl -X POST \
+     *   http://localhost:8080/review \
+     *   -H 'cache-control: no-cache' \
+     *   -H 'content-type: application/json' \
+     *   -d '{
+     * "idMovie":3,
+     * "stars":1,
+     * "comment":"Nice"
+     * }'
      * @param request {@link ReviewRequest} body request  containing the review information
      * @return Response Entity
      * <200>Saved</200>
      * <500>Error</500>
      */
-    @PostMapping(REVIEW)
+    @PostMapping(value = REVIEW, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity createReview(@RequestBody ReviewRequest request) {
         try {
             ReviewDto dto = new ReviewDto();
@@ -151,20 +178,26 @@ public class MovieController {
     }
 
     /**
-     * This method if provided just internal movieId with retrieve the exteranl
+     * This endpoint if provided just internal movieId will retrieve the external
      * movie id form the DB and return a description provided by external API.
-     *  If external identificator is provided directly, it will consult the exteranl API without
-     *  local DB validation.
-     * @param idMovie Internal id movie
-     * @param iMBDmovieId External applicaiton Id movie
+     * EX: curl -X GET \
+     *   'http://localhost:8080/description?idMovie=3' \
+     *   -H 'cache-control: no-cache' \
+     * If external identification is provided directly, it will consult the externalAPI without
+     * local DB validation.
+     * Ex: curl -X GET \
+     *   'http://localhost:8080/description?idMovieIMDb=tt0232500' \
+     *   -H 'cache-control: no-cache' \
+     * @param idMovie     Internal id movie
+     * @param idMovieIMDb External applicaiton Id movie
      * @return Response Entity.
      * <200>MovieDescriptionResponse</200>
      * <400>Bad Request</400>
      * <500>Server Error</500>
      */
-    @GetMapping(DESCRIPTION)
+    @GetMapping(value = DESCRIPTION, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MovieDescriptionResponse> getMovieDescriptionResponse(@RequestParam(name = "idMovie", required = false) Long idMovie,
-        @RequestParam(name = "idMovieIMDb", required = false) String iMBDmovieId) {
+        @RequestParam(name = "idMovieIMDb", required = false) String idMovieIMDb) {
 
         try {
             if (idMovie != null) {
@@ -177,8 +210,8 @@ public class MovieController {
                 response.setRuntime(dto.getRuntime());
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
-            if (iMBDmovieId != null) {
-                MovieDescriptionDto dto = movieServiceImpl.getMovieDescriptionByExternalId(iMBDmovieId);
+            if (idMovieIMDb != null) {
+                MovieDescriptionDto dto = movieServiceImpl.getMovieDescriptionByExternalId(idMovieIMDb);
                 MovieDescriptionResponse response = new MovieDescriptionResponse();
                 response.setName(dto.getName());
                 response.setDescription(dto.getDescription());
@@ -186,9 +219,9 @@ public class MovieController {
                 response.setIMDGRating(dto.getIMDGRating());
                 response.setRuntime(dto.getRuntime());
                 ArrayList ratingList = new ArrayList();
-                for (MovieDescriptionDto.Rating ratingDto: dto.getRating()
+                for (MovieDescriptionDto.Rating ratingDto : dto.getRating()
                 ) {
-                    MovieDescriptionResponse.Rating rating = new MovieDescriptionResponse.Rating() ;
+                    MovieDescriptionResponse.Rating rating = new MovieDescriptionResponse.Rating();
                     rating.setSource(ratingDto.getSource());
                     rating.setValue(ratingDto.getValue());
                     ratingList.add(rating);
@@ -223,6 +256,7 @@ public class MovieController {
             responseSession.setRooms(movie.getRooms());
             responseSession.setDateMovie(movie.getDateMovie());
             responseSession.setTimeMovie(movie.getTimeMovie().toLocalTime().toString());
+            responseSession.setPrice(movie.getPrice());
 
             response.add(responseSession);
         }

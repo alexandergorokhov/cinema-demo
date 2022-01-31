@@ -75,6 +75,7 @@ public class MovieServiceImpl implements MovieService {
             dto.setRooms(entity.getRoom());
             dto.setTimeMovie(entity.getSessionTime());
             dto.setDateMovie(entity.getSessionDate());
+            dto.setPrice(entity.getPrice());
             response.add(dto);
         }
         return response;

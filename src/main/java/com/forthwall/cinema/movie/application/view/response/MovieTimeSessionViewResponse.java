@@ -8,9 +8,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
+
 
 /**
  * Web response to see movie timing
@@ -43,4 +43,9 @@ public class MovieTimeSessionViewResponse {
      * Time when the movie is played
      */
     private String timeMovie;
+
+    /**
+     * Price of the Session
+     */
+    private BigDecimal price;
 }
