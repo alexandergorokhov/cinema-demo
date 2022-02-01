@@ -16,6 +16,10 @@
     <description>Demo for forth wall cinema</description>
     <properties>
         <java.version>11</java.version>
+        <h2.version>1.4.200</h2.version>
+        <lombok.version>1.18.22</lombok.version>
+        <springdoc-openui.version>1.6.5</springdoc-openui.version>
+        <springdoc-openapi-data-rest.version>1.6.4</springdoc-openapi-data-rest.version>
     </properties>
     <dependencies>
         <dependency>
@@ -38,7 +42,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.22</version>
+            <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -48,20 +52,19 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.6.5</version>
+            <version>${springdoc-openui.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-data-rest</artifactId>
-            <version>1.6.4</version>
+            <version>${springdoc-openapi-data-rest.version}</version>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>1.4.200</version>
+            <version>${h2.version}</version>
             <scope>runtime</scope>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

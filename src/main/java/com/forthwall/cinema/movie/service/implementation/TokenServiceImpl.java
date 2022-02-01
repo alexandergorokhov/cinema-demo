@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 @Service
 public final class TokenServiceImpl implements TokeService {
 
-    @Value("${token}")
+    @Value("${TOKEN}")
     private   String TOKEN ;
 
     @Override

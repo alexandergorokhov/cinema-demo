@@ -224,6 +224,8 @@ public class MovieController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "operation successful",
             content = @Content),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content
+        ),
         @ApiResponse(responseCode = "500", description = "Error", content = @Content
         )})
     @PostMapping(value = REVIEW, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)

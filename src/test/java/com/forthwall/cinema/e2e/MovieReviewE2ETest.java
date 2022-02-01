@@ -22,7 +22,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest (properties = { "IMDB_API_KEY=x123","token=1234" })
+@SpringBootTest (properties = { "IMDB_API_KEY=x123","TOKEN=1234" })
 public class MovieReviewE2ETest {
 
     private MockMvc mockMvc;
