@@ -10,11 +10,11 @@ INSERT INTO MOVIES (name_movie) VALUES
   ('F9: The Fast Saga');
 
 INSERT INTO MOVIE_SESSION (id_movie,session_time,price,session_date,room) VALUES
-  (2,'2022-07-14T17:45:55.9483536', 7.01, PARSEDATETIME('03-february-22','dd-MMMM-yy'),'blue_room'),
-  (3,'2022-07-14T17:45:55.9483536', 6.01, PARSEDATETIME('03-february-22','dd-MMMM-yy'),'red_room'),
-  (4,'2022-07-14T17:45:55.9483536', 9.01, PARSEDATETIME('03-february-22','dd-MMMM-yy'),'yellow_room'),
-  (4,'2022-08-14T17:45:55.9483536', 8.01,PARSEDATETIME('04-february-22','dd-MMMM-yy'),'yellow_room'),
-  (5,'2022-09-14T17:45:55.9483536', 9.01,PARSEDATETIME('05-february-22','dd-MMMM-yy'),'yellow_room');
+  (2,'2022-07-14T17:45:55.9483536', 7.01, PARSEDATETIME('07-july-22','dd-MMMM-yy'),'blue_room'),
+  (3,'2022-07-14T17:45:55.9483536', 6.01, PARSEDATETIME('07-july-22','dd-MMMM-yy'),'red_room'),
+  (4,'2022-07-14T17:45:55.9483536', 9.01, PARSEDATETIME('07-july-22','dd-MMMM-yy'),'yellow_room'),
+  (4,'2022-08-14T17:45:55.9483536', 8.01,PARSEDATETIME('08-august-22','dd-MMMM-yy'),'yellow_room'),
+  (5,'2022-09-14T17:45:55.9483536', 9.01,PARSEDATETIME('09-september-22','dd-MMMM-yy'),'yellow_room');
 
 INSERT INTO MOVIE_REVIEW (id_movie,stars,comment) VALUES
   (2,3,'good'),

@@ -52,7 +52,7 @@ public class MovieServiceImpl implements MovieService {
      * @return returns all movies in a List that are in the DB
      */
     @Override
-    public List<MovieDto> getAllMovies() {
+        public List<MovieDto> getAllMovies() {
         List<MovieEntity> moviesEntities = movieDao.findAll();
         ArrayList<MovieDto> movies = new ArrayList<>();
         for (MovieEntity entity : moviesEntities

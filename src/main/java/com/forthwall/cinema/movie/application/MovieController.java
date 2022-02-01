@@ -37,7 +37,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 import javax.validation.Valid;
 
 /**
@@ -75,12 +74,10 @@ public class MovieController {
      * 'http://localhost:8080/movieSession?date=2022-02-03' \
      * -H 'cache-control: no-cache' \
      *
-     * @param idMovie Id of the movie to be viewed
      * @param date    Date of the movie to which the availability wants to be known.
      * @return {@link MovieTimeRequest}. Is a response object that contains
      * information about movie time, rooms , prices  for desired date.
      * <>200</> - return information of movie sessions
-     * <>204<</> - no information was found
      * <>500</> -  error
      */
     @Operation(summary = "This endpoint will provide users with information about all the movie sessions (movie session = movie played, time ,room, price) for the specified date.")
@@ -88,25 +85,20 @@ public class MovieController {
         @ApiResponse(responseCode = "200", description = "Return information about all movie sesisons",
             content = {@Content(mediaType = "application/json",
                 schema = @Schema(implementation = MovieTimeSessionViewResponse.class))}),
-        @ApiResponse(responseCode = "204", description = "No movie sessions were found", content = @Content),
         @ApiResponse(responseCode = "500", description = "Error", content = @Content
         )})
     @GetMapping(value = MOVIES_SESSION, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<MovieTimeSessionViewResponse>> movieSessionsByDate(
-        @RequestParam(value = "idMovie", required = false) Long idMovie,
         @RequestParam(value = "date", required = false) String date) {
         try {
             MovieTimeSessionDto dto = new MovieTimeSessionDto();
-            dto.setIdMovie(idMovie);
             dto.setTimeMovie(LocalDateTime.parse(date, DateUtils.getDateTimeFormatter()));
-            if (idMovie == null && date != null) {
-                List<MovieTimeSessionDto> dtoResponse = movieServiceImpl.getMoviesByDate(LocalDate.parse(date));
-                List<MovieTimeSessionViewResponse> response = prepareListOfMoviesSessionResponse(dtoResponse);
-                return new ResponseEntity<>(response, HttpStatus.OK);
-            }
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            List<MovieTimeSessionDto> dtoResponse = movieServiceImpl.getMoviesByDate(LocalDate.parse(date));
+            List<MovieTimeSessionViewResponse> response = prepareListOfMoviesSessionResponse(dtoResponse);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+
         } catch (RuntimeException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -124,11 +116,10 @@ public class MovieController {
      */
     @Operation(summary = "This endpoint will provide all the movies (id, name) available in the database.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Return information about all movie sesisons",
+        @ApiResponse(responseCode = "200", description = "Return information about all movie sessions",
             content = {@Content(mediaType = "application/json",
                 array = @ArraySchema(schema = @Schema(implementation = MovieTimeSessionViewResponse.class))
             )}),
-        @ApiResponse(responseCode = "204", description = "No movie sessions were found", content = @Content),
         @ApiResponse(responseCode = "500", description = "Error", content = @Content
         )})
     @GetMapping(value = MOVIES, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -243,10 +234,11 @@ public class MovieController {
             dto.setStars(request.getStars());
             dto.setIdMovie(request.getIdMovie());
             movieServiceImpl.saveReview(dto);
-            return new ResponseEntity(HttpStatus.OK);
         } catch (RuntimeException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+        return new ResponseEntity(HttpStatus.OK);
+
     }
 
     /**
