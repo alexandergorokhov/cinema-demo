@@ -1,4 +1,4 @@
-#Cinema.
+# Cinema.
 ## Demo
 ## Description
 ### This is code describes a backend for a small cinema. 
@@ -14,7 +14,7 @@ This movie is played at 14:00 on 01.01.2024 in blue room for a price 10 - Movie 
 Anyone can post a rating for a Movie.
 Anyone can consult a movie description.
 
-##Implementation:
+## Implementation:
 1. Java 11.
 2. Spring-Boot 2.6
 3. Spring JPA with Hibernate 2.6
@@ -25,9 +25,9 @@ Anyone can consult a movie description.
 8. Mockito.
 9. Junit
 
-##How to run
+## How to run
 You can build and run the jar directly or you can use your favorite IDE.
-###Provide as environment variables:
+### Provide as environment variables:
 1. TOKEN - which will be used to communicate with endpoint used for administrative tasks. It is part of env variables, and will be used in Bearer header for administrative endpoint (you can assign the value you like as token). 
 2. IMDB_API_KEY - which is used to communicate with external API for movies description. You can get this API_KEY going to  [OMDB](http://www.omdbapi.com/) .
 
@@ -35,14 +35,14 @@ You can build and run the jar directly or you can use your favorite IDE.
 ### Endpoints documentation is available on http://{host}}:8080/swagger-ui/index.html
 ### H2 console available during runtime http://{host}:8080/h2-console/
 
-##Considerations
+## Considerations
 - It's a demo made in particular timeframe, scope, and done in spare time. 
 - Some concepts are applied only to certain classes to show the knowledge of the concept. 
 - The administrative endpoint secured with a token with Bearer header. Since there were no specifications, this approach was taken to fulfill the requirement.
 - The validation classes for web input and data clean up are only applied to one method to show the concept.
 - Testing is incomplete as per coverage, and it contains only integration testing for each layer and E2E test. This complies with requirements.
 
-##Improvements and clarifications
+## Improvements and clarifications
 - It started as DDD project, but the whole model was anemic. The business domain was just a POJO, since there is no business logic, it s more of a CRUD.
 That's why the domain package has been deleted, and the communication relies on DTO. 
 - The administrative endpoint secured with a token with Bearer header.
